@@ -13,6 +13,7 @@ This is a Laravel blueprint for backend development, for creating a multi-tenant
 - serve the application `php artisan serve` or use laravel valet, or any other server
 - run `npm run dev`
 - visit the application in your browser `http://localhost:8000`
+- visit postman document https://documenter.getpostman.com/view/2573933/2sA3XLDiGy
 
 ## APIs
 
