@@ -4,24 +4,22 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('choices', function (Blueprint $table) {
+        Schema::create('attempts', function (Blueprint $table) {
             $table->id();
             $table->string('tenant_id');
-            $table->foreignId('question_id')->constrained()->onDelete('cascade');
-            $table->string('title');
-            $table->boolean('is_correct')->default(false);
-            $table->integer('order')->default(0);
-            $table->string('description')->nullable()->default(null);
-            $table->string('explanation')->nullable()->default(null);
+            $table->foreignId('member_id')->references('id')->on('members')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('quiz_id')->references('id')->on('quizzes')->onUpdate('cascade')->onDelete('cascade');
+            $table->decimal('score');
             $table->timestamps();
-
             $table->softDeletes();
+
             $table->foreign('tenant_id')->references('id')->on('tenants')->onUpdate('cascade')->onDelete('cascade');
         });
     }
@@ -31,6 +29,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('choices');
+        Schema::dropIfExists('attempts');
     }
 };

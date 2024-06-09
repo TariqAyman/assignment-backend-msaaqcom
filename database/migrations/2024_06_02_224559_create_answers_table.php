@@ -11,19 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('questions', function (Blueprint $table) {
+        Schema::create('answers', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('member_id')->references('id')->on('members')->onUpdate('cascade')->onDelete('cascade');
             $table->string('tenant_id');
-            $table->foreignId('quiz_id')->constrained()->onDelete('cascade');
+            $table->foreignId('attempt_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('question');
-            $table->string('slug')->unique();
-            $table->string('type');
-            $table->string('description')->nullable()->default(null);
+            $table->foreignId('question_id')->references('id')->on('questions')->onUpdate('cascade')->onDelete('cascade');
+            $table->boolean('is_correct')->nullable();
+            $table->json('chosen_answers');
+            $table->json('correct_answers');
             $table->timestamps();
-
             $table->softDeletes();
+
             $table->foreign('tenant_id')->references('id')->on('tenants')->onUpdate('cascade')->onDelete('cascade');
-            $table->unique(['slug', 'tenant_id']);
         });
     }
 
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('questions');
+        Schema::dropIfExists('answers');
     }
 };
