@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Events\FinishedProcessed;
+use App\Events\SubscribedProcessed;
+use App\Listeners\SendFinishedQuizNotification;
+use App\Listeners\SendQuizLinkNotification;
+use App\Listeners\SendQuizReminderNotification;
+use App\Listeners\SendQuizResultNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -17,6 +23,13 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+        SubscribedProcessed::class => [
+            SendQuizLinkNotification::class,
+        ],
+        FinishedProcessed::class => [
+            SendQuizResultNotification::class,
+            SendFinishedQuizNotification::class,
         ],
     ];
 
