@@ -8,18 +8,20 @@ use Filament\Models\Contracts\HasDefaultTenant;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\HasApiTokens;
 use App\Trait\BelongsToTenant;
-use Illuminate\Database\Eloquent\Model;
 
-class User extends Authenticatable implements FilamentUser, HasTenants , HasDefaultTenant
+class Member extends Authenticatable implements FilamentUser, HasTenants, HasDefaultTenant
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, BelongsToTenant;
 
     /**
      * The attributes that are mass assignable.
@@ -27,6 +29,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants , HasDefa
      * @var array<int, string>
      */
     protected $fillable = [
+        'tenant_id',
         'name',
         'email',
         'password',
@@ -52,14 +55,14 @@ class User extends Authenticatable implements FilamentUser, HasTenants , HasDefa
         'password' => 'hashed',
     ];
 
-    public function tenants(): BelongsToMany
+    public function quizzes(): BelongsToMany
     {
-        return $this->belongsToMany(Tenant::class);
+        return $this->belongsToMany(Quiz::class, 'member_quiz');
     }
 
-    public function getDefaultTenant(Panel $panel): ?Model
+    public function attempts(): HasMany
     {
-        return $this->tenants()->first();
+        return $this->hasMany(Attempt::class);
     }
 
     /**
@@ -67,16 +70,26 @@ class User extends Authenticatable implements FilamentUser, HasTenants , HasDefa
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        return $panel->getId() == 'admin';
+        return $panel->getId() == 'member';
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function getDefaultTenant(Panel $panel): ?Model
+    {
+        return $this->tenant;
     }
 
     public function canAccessTenant(Model $tenant): bool
     {
-        return $this->tenants->contains($tenant);
+        return $this->tenant->id == $tenant->id;
     }
 
     public function getTenants(Panel $panel): array|Collection
     {
-        return $this->tenants;
+        return [$this->tenant];
     }
 }
